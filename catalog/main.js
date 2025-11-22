@@ -27,12 +27,31 @@ async function createCar(carName,carMark,carColor){
     const respons=await fetch('cars', {
         method:'Get', 
         headers:{'Accept':'application/json'}, 
-        body:JSON.stringify({name:carName, mark:carMark, clolor:carColor})
+        body:JSON.stringify({name:carName, mark:carMark, color:carColor})
     }) 
     if (respons.ok===true){
         const car=await respons.json()
         document.querySelector('tbody').append(row(car))
     }
+}
+
+async function deleteCar(id) {
+    const respons=await fetch(`cars/${id}`, {
+        method:'GET',
+        headers:{'Accept':'application/json'}
+    })
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector(`td[data-rowid='${car.id}']`).remove()
+    }
+    else {
+        const error=await respons.json()
+        console.log(error.message)
+    }
+}
+
+async function buyCar(id,name,mark,color) {
+    pass
 }
 
 function row(car){
@@ -56,9 +75,36 @@ function row(car){
     const buyLink=document.createElement('button')
     buyLink.append('Купить автомобиль')
     buyLink.addEventListener('click', async()=>await getCar(car.id))
-
     linksTd.append(buyLink)
+
+    const deleteLink=document.createElement('button')
+    deleteLink.append('Удалить автомобиль')
+    deleteLink.addEventListener('click', async()=>await deleteCar(car.id))
+    linksTd.append(deleteLink)
+
     tr.appendChild(linksTd)
     return tr
-
 }
+
+function reset(){
+    document.getElementById('carId').value=''
+    document.getElementById('carName').value=''
+    document.getElementById('carMark').value=''
+    document.getElementById('carColor').value=''
+}
+
+document.getElementById('save').addEventListener('click', async()=>{
+    const id=document.getElementById('carId').value
+    const name=document.getElementById('carName').value
+    const mark=document.getElementById('carMark').value
+    const color=document.getElementById('carColor').value
+    if (id===''){
+        await createCar(name,mark,color)
+    }
+    else {
+        await editCar(id,name,mark,color)
+    }
+    reset()  
+})
+
+getCars()

@@ -6,7 +6,6 @@ SALALCHEMY_DATABASE_URL='sqlite:///./sql_app.db'
 engine=create_engine(SALALCHEMY_DATABASE_URL, connect_args={'check_same_thread':False})
 
 class Base(DeclarativeBase):pass
-
 class Cars(Base):
     __tablename__='cars'
     id=Column(Integer, primary_key=True, index=True)
