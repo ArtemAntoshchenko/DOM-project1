@@ -42,9 +42,59 @@ async def add_car(request:Request, db: Session=Depends(db_get)):
     db.refresh(new_car)
     return new_car
 
+@app.put('/cars')
+async def edit_car(request:Request, db:Session=Depends(db_get)):
+    raw_data=await request.body()
+    data=json.loads(raw_data)
+    edit_car=db.query(Cars).filter(Cars.id==data['id']).first()
+    if edit_car==None:
+        return JSONResponse(status_code=404, content={ "message": "Пользователь не найден"})
+    edit_car.name=data['name']
+    edit_car.mark=data['mark']
+    edit_car.color=data['color']
+    db.commit()
+    db.refresh(edit_car)
+    return edit_car
+
 @app.delete('/cars/{id}')
 def delet_car(id,db: Session=Depends(db_get)):
     del_car=db.query(Cars).filter(Cars.id==id).first()
+    if del_car==None:
+        return JSONResponse(status_code=404, content={'message':'Автомомбиль не найден'})
+    db.delete(del_car)
+    db.commit()
+    return del_car
+
+
+
+@app.get('/soldcars')
+def get_cars(db: Session=Depends(db_get)):
+    return db.query(soldCars).all()
+
+@app.get('/soldcars/{id}')
+def get_car(id,db: Session=Depends(db_get)):
+    car=db.query(soldCars).filter(soldCars.id==id).first()
+    if car==None:
+        return JSONResponse(status_code=404, content={'message':'Автомомбиль не найден'})
+    return car
+
+@app.put('/soldcars')
+async def edit_car(request:Request, db:Session=Depends(db_get)):
+    raw_data=await request.body()
+    data=json.loads(raw_data)
+    edit_car=db.query(soldCars).filter(soldCars.id==data['id']).first()
+    if edit_car==None:
+        return JSONResponse(status_code=404, content={ "message": "Пользователь не найден"})
+    edit_car.name=data['name']
+    edit_car.mark=data['mark']
+    edit_car.color=data['color']
+    db.commit()
+    db.refresh(edit_car)
+    return edit_car
+
+@app.delete('/soldcars/{id}')
+def delet_car(id,db: Session=Depends(db_get)):
+    del_car=db.query(soldCars).filter(soldCars.id==id).first()
     if del_car==None:
         return JSONResponse(status_code=404, content={'message':'Автомомбиль не найден'})
     db.delete(del_car)

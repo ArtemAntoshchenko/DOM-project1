@@ -13,4 +13,12 @@ class Cars(Base):
     mark=Column(String)
     color=Column(String)
 
+
+class soldCars(Base):
+    __tablename__='soldCars'
+    id=Column(Integer, primary_key=True, index=True)
+    name=Column(String)
+    mark=Column(String)
+    color=Column(String)
+
 session=sessionmaker(autoflush=False, bind=engine)

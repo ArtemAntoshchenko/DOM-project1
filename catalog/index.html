@@ -15,13 +15,13 @@
     <h2>Доступные автомобили:</h2>
     <table>
         <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
-        <tbody>
+        <tbody align="center" id="tbodyCars">
         </tbody>
     </table>
     <h2>Купленные автомобили:</h2>
     <table>
         <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
-        <tbody>
+        <tbody align="center" id="tbodySoldCars">
         </tbody>
     </table>
     <div>
@@ -37,9 +37,19 @@ async function getCars() {
 const respons= await fetch('/cars', {method:'GET', headers:{'Accept':'application/json'}})
 if (respons.ok === true){
     const cars=await respons.json()
-    const rows=document.querySelector('tbody')
+    const rows=document.querySelector('#tbodyCars')
     cars.forEach(car=>rows.append(row(car)))
 }
+}
+
+async function get_soldCars() {
+    const respons=await fetch('/soldcars',{method:'GET',headers:{'Accept':'application/json'}})
+    if (respons.ok===true){
+        const soldCars=await respons.json()
+        const rows=document.querySelector('#tbodySoldCars')
+        soldCars.forEach(car=>rows.append(soldRow(car)))
+    }
+    
 }
 
 async function getCar(id) {
@@ -47,6 +57,22 @@ async function getCar(id) {
     if (respons.ok===true){
         const car=await respons.json()
         document.getElementById('carId').value=car.id
+        document.getElementById('carName').value=car.name
+        document.getElementById('carMark').value=car.mark
+        document.getElementById('carColor').value=car.color
+    }
+    else {
+        const error=await respons.json()
+        console.log(error.message)
+    }
+    
+}
+
+async function get_soldCar(id) {
+    const respons=await fetch(`/soldcars/${id}`, {method:'GET', headers:{'Accept':'application/json'}})
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector('carId').value=car.id
         document.getElementById('carName').value=car.name
         document.getElementById('carMark').value=car.mark
         document.getElementById('carColor').value=car.color
@@ -67,12 +93,59 @@ async function createCar(carName,carMark,carColor) {
     }) 
     if (respons.ok===true){
         const car=await respons.json()
-        document.querySelector('tbody').append(row(car))
+        document.querySelector('#tbodyCars').append(row(car))
+    }
+}
+
+async function editCar(carId,carName,carMark,carColor) {
+    const respons=await fetch('/cars', {
+        method:'PUT',
+        headers:{'Accept':'application/json'},
+        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
+    })
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector(`tr[data-rowid='${car.id}']`).replaceWith(row(car))
+    }
+    else {
+        const error=await respons.json()
+        console.log(error.message)
+    }
+}
+
+async function edit_soldCar(carId,carName,carMark,carColor) {
+    const respons=await fetch('/soldcars', {
+        method:'PUT',
+        headers:{'Accept':'application/json'},
+        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
+    })
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector(`tr[data-rowid='${car.id}']`).replaceWith(soldRow(car))
+    }
+    else {
+        const error=await respons.json()
+        console.log(error.message)
     }
 }
 
 async function deleteCar(id) {
     const respons=await fetch(`/cars/${id}`, {
+        method:'DELETE',
+        headers:{'Accept':'application/json'}
+    })
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector(`td[data-rowid='${car.id}']`).remove()
+    }
+    else {
+        const error=await respons.json()
+        console.log(error.message)
+    }
+}
+
+async function delete_soldCar(id) {
+    const respons=await fetch(`/soldcars/${id}`, {
         method:'DELETE',
         headers:{'Accept':'application/json'}
     })
@@ -113,6 +186,43 @@ function row(car) {
     buyLink.addEventListener('click', async()=>await getCar(car.id))
     linksTd.append(buyLink)
 
+    const editCar=document.createElement('button')
+    editCar.append('Изменить автомобиль')
+    editCar.addEventListener('click', async()=>await getCar(car.id))
+    linksTd.append(editCar)
+
+    const deleteLink=document.createElement('button')
+    deleteLink.append('Удалить автомобиль')
+    deleteLink.addEventListener('click', async()=>await deleteCar(car.id))
+    linksTd.append(deleteLink)
+
+    tr.appendChild(linksTd)
+    return tr
+}
+
+function soldRow(car) {
+    const tr=document.createElement('tr')
+    tr.setAttribute('data-rowid', car.id)
+
+    const nameTd=document.createElement('td')
+    nameTd.append(car.name)
+    tr.append(nameTd)
+
+    const markTd=document.createElement('td')
+    markTd.append(car.mark)
+    tr.append(markTd)
+
+    const colorTd=document.createElement('td')
+    colorTd.append(car.color)
+    tr.append(colorTd)
+
+    const linksTd=document.createElement('td')
+
+    const editLink=document.createElement('button')
+    editLink.append('Изменить автомобиль')
+    editLink.addEventListener('click', async()=>await get_soldCar(car.id))
+    linksTd.append(editLink)
+
     const deleteLink=document.createElement('button')
     deleteLink.append('Удалить автомобиль')
     deleteLink.addEventListener('click', async()=>await deleteCar(car.id))
@@ -144,6 +254,7 @@ document.getElementById('save').addEventListener('click', async()=>{
 })
 
 getCars()
+get_soldCars()
 </script>
 </body>
 </html>
