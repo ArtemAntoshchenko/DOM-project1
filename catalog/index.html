@@ -34,7 +34,7 @@
     </div>
 <script>
 async function getCars() {
-const respons= await fetch('/cars', {method:'GET', headers:{'Accept':'application/json'}})
+const respons=await fetch('/cars', {method:'GET', headers:{'Accept':'application/json'}})
 if (respons.ok === true){
     const cars=await respons.json()
     const rows=document.querySelector('#tbodyCars')
@@ -43,8 +43,8 @@ if (respons.ok === true){
 }
 
 async function get_soldCars() {
-    const respons=await fetch('/soldcars',{method:'GET',headers:{'Accept':'application/json'}})
-    if (respons.ok===true){
+    const respons=await fetch('/soldcars',{method:'GET', headers:{'Accept':'application/json'}})
+    if (respons.ok === true){
         const soldCars=await respons.json()
         const rows=document.querySelector('#tbodySoldCars')
         soldCars.forEach(car=>rows.append(soldRow(car)))
@@ -94,6 +94,19 @@ async function createCar(carName,carMark,carColor) {
     if (respons.ok===true){
         const car=await respons.json()
         document.querySelector('#tbodyCars').append(row(car))
+    }
+}
+
+async function buyCar(id,name,mark,color) {
+    const respons=await fetch('/soldcars', {
+        method:'POST', 
+        headers:{'Accept':'application/json'},
+        body: JSON.stringify({id:id,name:name, mark:mark, color:color})
+    })
+    if (respons.ok===true){
+        const car=await respons.json()
+        document.querySelector(`td[data-rowid='${car.id}']`).remove()
+        document.querySelector('#tbodySoldCars').append(soldRow(car))
     }
 }
 
@@ -159,10 +172,6 @@ async function delete_soldCar(id) {
     }
 }
 
-async function buyCar(id,name,mark,color) {
-    pass
-}
-
 function row(car) {
     const tr=document.createElement('tr')
     tr.setAttribute('data-rowid', car.id)
@@ -183,7 +192,7 @@ function row(car) {
 
     const buyLink=document.createElement('button')
     buyLink.append('Купить автомобиль')
-    buyLink.addEventListener('click', async()=>await getCar(car.id))
+    buyLink.addEventListener('click', async()=>await buyCar(car.id, car.name, car.mark, car.color))
     linksTd.append(buyLink)
 
     const editCar=document.createElement('button')
@@ -225,7 +234,7 @@ function soldRow(car) {
 
     const deleteLink=document.createElement('button')
     deleteLink.append('Удалить автомобиль')
-    deleteLink.addEventListener('click', async()=>await deleteCar(car.id))
+    deleteLink.addEventListener('click', async()=>await delete_soldCar(car.id))
     linksTd.append(deleteLink)
 
     tr.appendChild(linksTd)
@@ -248,6 +257,12 @@ document.getElementById('save').addEventListener('click', async()=>{
         await createCar(name,mark,color)
     }
     else {
+    //     if(id in getCars()){
+    //         await editCar(id,name,mark,color)
+    //     }
+    //     else {
+    //         await edit_soldCar(id,name,mark,color)
+    //     }
         await editCar(id,name,mark,color)
     }
     reset()  
