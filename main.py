@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends, Body, Request
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from database import *
 import json 
@@ -19,6 +20,8 @@ app=FastAPI()
 def index():
     return FileResponse('catalog/index.html')
 
+# app.mount("/", StaticFiles(directory='catalog'), name='static')
+
 @app.get('/cars')
 def get_cars(db: Session=Depends(db_get)):
     return db.query(Cars).all()
@@ -32,10 +35,12 @@ def get_car(id,db: Session=Depends(db_get)):
 
 @app.post('/cars')
 async def add_car(request:Request, db: Session=Depends(db_get)):
-    # print(f"Received data: {data}")
-    # print(f"Data type: {type(data)}")
+
     raw_data=await request.body()
+    print(f"Received data: {raw_data}")
+    print(f"Data type: {type(raw_data)}")
     data=json.loads(raw_data)
+
     new_car=Cars(name=data["name"], mark=data['mark'], color=data['color'])
     db.add(new_car)
     db.commit()

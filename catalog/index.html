@@ -32,6 +32,7 @@
         <p>Цвет:<br/><input id="carColor"/></p>
         <p><button id="save">Добавить</button></p>
     </div>
+    
 <script>
 async function getCars() {
 const respons=await fetch('/cars', {method:'GET', headers:{'Accept':'application/json'}})
@@ -56,10 +57,10 @@ async function getCar(id) {
     const respons=await fetch(`/cars/${id}`, {method:'GET', headers:{'Accept':'application/json'}})
     if (respons.ok===true){
         const car=await respons.json()
-        document.getElementById('carId').value=car.id
-        document.getElementById('carName').value=car.name
-        document.getElementById('carMark').value=car.mark
-        document.getElementById('carColor').value=car.color
+        document.querySelector('#carId').value=car.id
+        document.querySelector('#carName').value=car.name
+        document.querySelector('#carMark').value=car.mark
+        document.querySelector('#carColor').value=car.color
     }
     else {
         const error=await respons.json()
@@ -72,7 +73,7 @@ async function get_soldCar(id) {
     const respons=await fetch(`/soldcars/${id}`, {method:'GET', headers:{'Accept':'application/json'}})
     if (respons.ok===true){
         const car=await respons.json()
-        document.querySelector('carId').value=car.id
+        document.querySelector('#carId').value=car.id
         document.getElementById('carName').value=car.name
         document.getElementById('carMark').value=car.mark
         document.getElementById('carColor').value=car.color
@@ -85,11 +86,11 @@ async function get_soldCar(id) {
 }
 
 async function createCar(carName,carMark,carColor) {
-    let string={name:carName, mark:carMark, color:carColor}
+    // const string=
     const respons=await fetch('/cars', {
         method:'POST', 
-        headers:{'Accept':'application/json'}, 
-        body: JSON.stringify(string)
+        headers: {'Accept':'application/json', 'Content-Type': 'application/json'}, 
+        body: JSON.stringify({name:carName, mark:carMark, color:carColor})
     }) 
     if (respons.ok===true){
         const car=await respons.json()
@@ -100,7 +101,7 @@ async function createCar(carName,carMark,carColor) {
 async function buyCar(id,name,mark,color) {
     const respons=await fetch('/soldcars', {
         method:'POST', 
-        headers:{'Accept':'application/json'},
+        headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
         body: JSON.stringify({id:id,name:name, mark:mark, color:color})
     })
     if (respons.ok===true){
@@ -113,7 +114,7 @@ async function buyCar(id,name,mark,color) {
 async function editCar(carId,carName,carMark,carColor) {
     const respons=await fetch('/cars', {
         method:'PUT',
-        headers:{'Accept':'application/json'},
+        headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
         body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
     })
     if (respons.ok===true){
@@ -129,7 +130,7 @@ async function editCar(carId,carName,carMark,carColor) {
 async function edit_soldCar(carId,carName,carMark,carColor) {
     const respons=await fetch('/soldcars', {
         method:'PUT',
-        headers:{'Accept':'application/json'},
+        headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
         body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
     })
     if (respons.ok===true){
