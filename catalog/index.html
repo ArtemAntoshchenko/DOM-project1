@@ -106,7 +106,7 @@ async function buyCar(id,name,mark,color) {
     })
     if (respons.ok===true){
         const car=await respons.json()
-        document.querySelector(`td[data-rowid='${car.id}']`).remove()
+        document.querySelector(`tr[data-rowid='${car.id}']`).remove()
         document.querySelector('#tbodySoldCars').append(soldRow(car))
     }
 }
@@ -150,7 +150,7 @@ async function deleteCar(id) {
     })
     if (respons.ok===true){
         const car=await respons.json()
-        document.querySelector(`td[data-rowid='${car.id}']`).remove()
+        document.querySelector(`tr[data-rowid='${car.id}']`).remove()
     }
     else {
         const error=await respons.json()
