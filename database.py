@@ -12,6 +12,7 @@ class Cars(Base):
     name=Column(String)
     mark=Column(String)
     color=Column(String)
+    cost=Column(Integer)
 
 
 class soldCars(Base):
@@ -20,5 +21,6 @@ class soldCars(Base):
     name=Column(String)
     mark=Column(String)
     color=Column(String)
+    cost=Column(Integer)
 
 session=sessionmaker(autoflush=False, bind=engine)
