@@ -8,19 +8,21 @@
         td {padding:5px;}
         button{margin: 5px;}
         th {padding:5px; font-size: large;}
+        h3 {margin-left: 1500px; font-size: large}
     </style>
 </head>
 <body>
     <h1>Автосалон</h1>
+    <h3>Денег на счету:<input id="Funds"></h3>
     <h2>Доступные автомобили:</h2>
     <table>
-        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
+        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th><th>Цена</th></tr></thead>
         <tbody align="center" id="tbodyCars">
         </tbody>
     </table>
     <h2>Купленные автомобили:</h2>
     <table>
-        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
+        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th><th>Цена</th></tr></thead>
         <tbody align="center" id="tbodySoldCars">
         </tbody>
     </table>
@@ -30,6 +32,7 @@
         <p>Название:<br/><input id="carName"/></p>
         <p>Марка:<br/><input id="carMark"/></p>
         <p>Цвет:<br/><input id="carColor"/></p>
+        <p>Цена:<br/><input id="carCost"/></p>
         <p><button id="save">Добавить</button></p>
     </div>
     
@@ -61,6 +64,7 @@ async function getCar(id) {
         document.querySelector('#carName').value=car.name
         document.querySelector('#carMark').value=car.mark
         document.querySelector('#carColor').value=car.color
+        document.querySelector('#carCost').value=car.cost
     }
     else {
         const error=await respons.json()
@@ -77,6 +81,7 @@ async function get_soldCar(id) {
         document.getElementById('carName').value=car.name
         document.getElementById('carMark').value=car.mark
         document.getElementById('carColor').value=car.color
+        document.querySelector('#carCost').value=car.cost
     }
     else {
         const error=await respons.json()
@@ -85,12 +90,12 @@ async function get_soldCar(id) {
     
 }
 
-async function createCar(carName,carMark,carColor) {
+async function createCar(carName,carMark,carColor,carCost) {
     // const string=
     const respons=await fetch('/cars', {
         method:'POST', 
         headers: {'Accept':'application/json', 'Content-Type': 'application/json'}, 
-        body: JSON.stringify({name:carName, mark:carMark, color:carColor})
+        body: JSON.stringify({name:carName, mark:carMark, color:carColor, cost:carCost})
     }) 
     if (respons.ok===true){
         const car=await respons.json()
@@ -98,24 +103,25 @@ async function createCar(carName,carMark,carColor) {
     }
 }
 
-async function buyCar(id,name,mark,color) {
+async function buyCar(id,name,mark,color,cost) {
     const respons=await fetch('/soldcars', {
         method:'POST', 
         headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
-        body: JSON.stringify({id:id,name:name, mark:mark, color:color})
+        body: JSON.stringify({id:id,name:name, mark:mark, color:color, cost:cost})
     })
     if (respons.ok===true){
         const car=await respons.json()
         document.querySelector(`tr[data-rowid='${car.id}']`).remove()
         document.querySelector('#tbodySoldCars').append(soldRow(car))
+        await get_funds()
     }
 }
 
-async function editCar(carId,carName,carMark,carColor) {
+async function editCar(carId,carName,carMark,carColor,carCost) {
     const respons=await fetch('/cars', {
         method:'PUT',
         headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
-        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
+        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor, cost:carCost})
     })
     if (respons.ok===true){
         const car=await respons.json()
@@ -127,11 +133,11 @@ async function editCar(carId,carName,carMark,carColor) {
     }
 }
 
-async function edit_soldCar(carId,carName,carMark,carColor) {
+async function edit_soldCar(carId,carName,carMark,carColor,carCost) {
     const respons=await fetch('/soldcars', {
         method:'PUT',
         headers:{'Accept':'application/json', 'Content-Type': 'application/json'},
-        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor})
+        body: JSON.stringify({id:carId, name:carName, mark:carMark, color:carColor, cost:carCost})
     })
     if (respons.ok===true){
         const car=await respons.json()
@@ -189,11 +195,15 @@ function row(car) {
     colorTd.append(car.color)
     tr.append(colorTd)
 
+    const costTd=document.createElement('td')
+    costTd.append(car.cost)
+    tr.append(costTd)
+
     const linksTd=document.createElement('td')
 
     const buyLink=document.createElement('button')
     buyLink.append('Купить автомобиль')
-    buyLink.addEventListener('click', async()=>await buyCar(car.id, car.name, car.mark, car.color))
+    buyLink.addEventListener('click', async()=>await buyCar(car.id, car.name, car.mark, car.color, car.cost))
     linksTd.append(buyLink)
 
     const editCar=document.createElement('button')
@@ -226,6 +236,10 @@ function soldRow(car) {
     colorTd.append(car.color)
     tr.append(colorTd)
 
+    const costTd=document.createElement('td')
+    costTd.append(car.cost)
+    tr.append(costTd)
+
     const linksTd=document.createElement('td')
 
     const editLink=document.createElement('button')
@@ -247,6 +261,7 @@ function reset(){
     document.getElementById('carName').value=''
     document.getElementById('carMark').value=''
     document.getElementById('carColor').value=''
+    document.getElementById('carCost').value=''
 }
 
 document.getElementById('save').addEventListener('click', async()=>{
@@ -254,8 +269,9 @@ document.getElementById('save').addEventListener('click', async()=>{
     const name=document.getElementById('carName').value
     const mark=document.getElementById('carMark').value
     const color=document.getElementById('carColor').value
+    const cost=document.getElementById('carCost').value
     if (id===''){
-        await createCar(name,mark,color)
+        await createCar(name,mark,color,cost)
     }
     else {
     //     if(id in getCars()){
@@ -264,13 +280,27 @@ document.getElementById('save').addEventListener('click', async()=>{
     //     else {
     //         await edit_soldCar(id,name,mark,color)
     //     }
-        await editCar(id,name,mark,color)
+        await editCar(id,name,mark,color,cost)
     }
     reset()  
 })
 
+async function get_funds() {
+    const respons= await fetch('/funds',{
+        method:'GET',
+        headers:{'Accept':'application/json'}
+    })
+    if (respons.ok===true){
+        const data = await respons.json()
+        funds=data['num']
+        document.querySelector('#Funds').value=funds
+    }
+    
+}
+
 getCars()
 get_soldCars()
+get_funds()
 </script>
 </body>
 </html>

@@ -22,6 +22,13 @@ def index():
 
 # app.mount("/", StaticFiles(directory='catalog'), name='static')
 
+funds=0
+
+@app.get('/funds')
+def get_funds():
+    fund={'num':funds}
+    return fund
+
 @app.get('/cars')
 def get_cars(db: Session=Depends(db_get)):
     return db.query(Cars).all()
@@ -35,14 +42,13 @@ def get_car(id,db: Session=Depends(db_get)):
 
 @app.post('/cars')
 async def add_car(data=Body(), db: Session=Depends(db_get)):
-
     # raw_data=await request.body()
     # print(f"Received data: {raw_data}")
     # print(f"Data type: {type(raw_data)}")
     # data=json.loads(raw_data)
     print(f"Received data: {data}")
     print(f"Data type: {type(data)}")
-    new_car=Cars(name=data["name"], mark=data['mark'], color=data['color'])
+    new_car=Cars(name=data["name"], mark=data['mark'], color=data['color'], cost=data['cost'])
     db.add(new_car)
     db.commit()
     db.refresh(new_car)
@@ -58,6 +64,7 @@ async def edit_car(request:Request, db:Session=Depends(db_get)):
     edit_car.name=data['name']
     edit_car.mark=data['mark']
     edit_car.color=data['color']
+    edit_car.cost=data['cost']
     db.commit()
     db.refresh(edit_car)
     return edit_car
@@ -88,13 +95,16 @@ def get_soldCar(id,db: Session=Depends(db_get)):
 async def buy_car(request:Request, db: Session=Depends(db_get)):
     raw_data=await request.body()
     data=json.loads(raw_data)
-    new_soldCar=soldCars(id=data['id'],name=data["name"], mark=data['mark'], color=data['color'])
+    new_soldCar=soldCars(id=data['id'],name=data["name"], mark=data['mark'], color=data['color'], cost=data['cost'])
     db.add(new_soldCar)
     db.commit()
     db.refresh(new_soldCar)
     old_car=db.query(Cars).filter(Cars.id==data['id']).first()
     db.delete(old_car)
     db.commit()
+    carCost=data['cost']
+    global funds
+    funds+=carCost
     return new_soldCar
 
 @app.put('/soldcars')
@@ -107,6 +117,7 @@ async def edit_soldCar(request:Request, db:Session=Depends(db_get)):
     edit_car.name=data['name']
     edit_car.mark=data['mark']
     edit_car.color=data['color']
+    edit_car.cost=data['cost']
     db.commit()
     db.refresh(edit_car)
     return edit_car
