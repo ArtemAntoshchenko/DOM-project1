@@ -16,13 +16,13 @@
     <h3>Денег на счету:<input id="Funds"></h3>
     <h2>Доступные автомобили:</h2>
     <table>
-        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
+        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th><th>Цена</th></tr></thead>
         <tbody align="center" id="tbodyCars">
         </tbody>
     </table>
     <h2>Купленные автомобили:</h2>
     <table>
-        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th></tr></thead>
+        <thead><tr><th>Название</th><th>Марка</th><th>Цвет</th><th>Цена</th></tr></thead>
         <tbody align="center" id="tbodySoldCars">
         </tbody>
     </table>
@@ -113,6 +113,7 @@ async function buyCar(id,name,mark,color,cost) {
         const car=await respons.json()
         document.querySelector(`tr[data-rowid='${car.id}']`).remove()
         document.querySelector('#tbodySoldCars').append(soldRow(car))
+        await get_funds()
     }
 }
 
@@ -194,6 +195,10 @@ function row(car) {
     colorTd.append(car.color)
     tr.append(colorTd)
 
+    const costTd=document.createElement('td')
+    costTd.append(car.cost)
+    tr.append(costTd)
+
     const linksTd=document.createElement('td')
 
     const buyLink=document.createElement('button')
@@ -230,6 +235,10 @@ function soldRow(car) {
     const colorTd=document.createElement('td')
     colorTd.append(car.color)
     tr.append(colorTd)
+
+    const costTd=document.createElement('td')
+    costTd.append(car.cost)
+    tr.append(costTd)
 
     const linksTd=document.createElement('td')
 
@@ -275,14 +284,18 @@ document.getElementById('save').addEventListener('click', async()=>{
     }
     reset()  
 })
+
 async function get_funds() {
     const respons= await fetch('/funds',{
         method:'GET',
         headers:{'Accept':'application/json'}
     })
-    const data = await respons.JSON()
-    funds=data['num']
-    document.querySelector('#Funds').value=funds
+    if (respons.ok===true){
+        const data = await respons.json()
+        funds=data['num']
+        document.querySelector('#Funds').value=funds
+    }
+    
 }
 
 getCars()

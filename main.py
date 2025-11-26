@@ -22,15 +22,16 @@ def index():
 
 # app.mount("/", StaticFiles(directory='catalog'), name='static')
 
+funds=0
+
 @app.get('/funds')
 def get_funds():
-    funds={'num':0}
-    return funds
+    fund={'num':funds}
+    return fund
 
 @app.get('/cars')
 def get_cars(db: Session=Depends(db_get)):
-    funds=0
-    return db.query(Cars).all(), funds
+    return db.query(Cars).all()
 
 @app.get('/cars/{id}')
 def get_car(id,db: Session=Depends(db_get)):
@@ -101,6 +102,9 @@ async def buy_car(request:Request, db: Session=Depends(db_get)):
     old_car=db.query(Cars).filter(Cars.id==data['id']).first()
     db.delete(old_car)
     db.commit()
+    carCost=data['cost']
+    global funds
+    funds+=carCost
     return new_soldCar
 
 @app.put('/soldcars')
